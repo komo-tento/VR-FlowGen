@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="utf-8">
+    <title>BGM</title>
+    <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+        }
+        .control-buttons {
+            position: fixed;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 999; /* A-Frameのシーンよりも前に表示 */
+        }
+        .control-buttons button {
+            margin: 0 10px;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="control-buttons">
+        <button id="nextButton" style="background-color: #1EB7FA; color: white;">Next</button>
+        <button id="speechButton" style="background-color: #1EB7FA; color: white;">Question（GPT4）</button>
+        <button id="toggleVisibilityButton" style="background-color: #1EB7FA; color: white;">Text hidden</button>
+    </div>
+    
+    <a-scene>
+        <a-assets>
+            <img id="sky1" src="test-image/kumonoito-test.jpg">
+            <img id="sky2" src="test-image/kumonoito-sky2.jpg">
+            <img id="sky3" src="test-image/kumonoito-sky3.jpg">
+            <img id="sky4" src="test-image/kumonoito-sky4.jpg">
+            <audio id="bgm1" src="sound/kumonoito-bgm1.mov"></audio>
+            <audio id="bgm2" src="sound/kumonoito-bgm2.mov"></audio>
+            <audio id="bgm3" src="sound/kumonoito-bgm3.mov"></audio>
+            <audio id="bgm4" src="sound/kumonoito-bgm4.mov"></audio>
+            <audio id="bgm5" src="sound/kumonoito-bgm5.mov"></audio>
+            <audio id="bgm6" src="sound/kumonoito-bgm6.mov"></audio>
+            <audio id="bgm7" src="sound/kumonoito-bgm7.mov"></audio>
+            <audio id="bgm8" src="sound/kumonoito-bgm8.mov"></audio>
+            <audio id="bgm9" src="sound/kumonoito-bgm9.mov"></audio>
+            <audio id="bgm10" src="sound/kumonoito-bgm10.mov"></audio>
+            <audio id="bgm11" src="sound/kumonoito-bgm11.mov"></audio>
+            <audio id="bgm12" src="sound/kumonoito-bgm12.mov"></audio>
+            <audio id="Effect1" src="Effect/Effect-1.mov"></audio>
+            <audio id="Effect2" src="Effect/Effect-2.mov"></audio>
+            <audio id="Effect3" src="Effect/Effect-3.mov"></audio>
+            <audio id="Effect4" src="Effect/Effect-4.mov"></audio>
+        </a-assets>
+
+        <a-sky id="sky" src="#sky1"></a-sky>
+        <a-text id="text1" position="0.0 2.0 2.0" data-text=""></a-text>
+
+        <!-- Effect音を空間に配置 -->
+        <a-sound id="effectSound1" src="#Effect1" position="0 1.6 0" volume="1" loop="true"></a-sound>
+        <a-sound id="effectSound2" src="#Effect2" position="0 1.6 0" volume="1" loop="true"></a-sound>
+        <a-sound id="effectSound3" src="#Effect3" position="0 1.6 0" volume="1" loop="true"></a-sound>
+        <a-sound id="effectSound4" src="#Effect4" position="0 1.6 0" volume="1" loop="true"></a-sound>
+
+
+        <!-- 音声認識結果表示 -->
+        <a-text id="recognizedText" position="-3 0 -3" value="Speech will display here" color="white" width="4"></a-text>
+        <a-entity id="recognizedTextContainer" scale="3.4 1 1"position="-4.3 2.3 -0.6" rotation="0 47 0"></a-entity> <!-- New entity to hold the image -->
+
+        <a-camera position="0 1.6 0">
+            <a-cursor fuse="false" raycaster="objects: .clickable"></a-cursor>
+        </a-camera>
+    </a-scene>
+
+    <script>
+        const mbTextElement = document.getElementById('text1');
+        let currentText = 0;  // 現在のテキスト番号
+        const audioElements = [
+            document.getElementById('bgm1'),
+            document.getElementById('bgm2'),
+            document.getElementById('bgm3'),
+            document.getElementById('bgm4'),
+            document.getElementById('bgm5'),
+            document.getElementById('bgm6'),
+            document.getElementById('bgm7'),
+            document.getElementById('bgm8'),
+            document.getElementById('bgm9'),
+            document.getElementById('bgm10'),
+            document.getElementById('bgm11'),
+            document.getElementById('bgm12'),
+        ];
+        
+        const effectElements = [
+            document.getElementById('effectSound1'),
+            document.getElementById('effectSound2'),
+            document.getElementById('effectSound3'),
+            document.getElementById('effectSound4')
+        ];
+        
+        const textFiles = [
+            {text: 'text/kumonoito-1.txt', bgm: audioElements[0], effect: effectElements[0]},
+            {text: 'text/kumonoito-2.txt', bgm: audioElements[1], effect: effectElements[1]},
+            {text: 'text/kumonoito-3.txt', bgm: audioElements[2], effect: effectElements[2]},
+            {text: 'text/kumonoito-4.txt', bgm: audioElements[3], effect: effectElements[3]},
+            {text: 'text/kumonoito-5.txt', bgm: audioElements[4], effect: effectElements[0]},
+            {text: 'text/kumonoito-6.txt', bgm: audioElements[5], effect: effectElements[1]},
+            {text: 'text/kumonoito-7.txt', bgm: audioElements[6], effect: effectElements[2]},
+            {text: 'text/kumonoito-8.txt', bgm: audioElements[7], effect: effectElements[3]},
+            {text: 'text/kumonoito-9.txt', bgm: audioElements[8], effect: effectElements[0]},
+            {text: 'text/kumonoito-10.txt', bgm: audioElements[9], effect: effectElements[1]},
+            {text: 'text/kumonoito-11.txt', bgm: audioElements[10], effect: effectElements[2]},
+            {text: 'text/kumonoito-12.txt', bgm: audioElements[11], effect: effectElements[3]}
+        ];
+
+        // ボタンのイベントリスナー設定
+        document.getElementById('nextButton').addEventListener('click', () => {
+            if (currentText < textFiles.length) {
+                stopAllAudio();
+                const {text, bgm, effect} = textFiles[currentText];
+                const sky = document.getElementById("sky");
+        
+                // currentText の値に応じて画像を変更
+                if (currentText === 2) { // kumonoito-3.txt
+                    sky.setAttribute("src", "#sky2"); // sky2 を設定
+                } else if (currentText === 4) { // kumonoito-5.txt
+                    sky.setAttribute("src", "#sky3"); // sky3 を設定
+                } else if (currentText === 8) { // kumonoito-9.txt
+                    sky.setAttribute("src", "#sky4"); // sky4 を設定
+                } 
+        
+                loadTextFile(text, bgm, effect);
+                bgm.play();
+                currentText++;
+            }
+        });
+
+
+        document.getElementById('speechButton').addEventListener('click', toggleRecognition);
+        document.getElementById('toggleVisibilityButton').addEventListener('click', toggleVisibility);
+
+        function toggleVisibility() {
+            // 画像パネルや他の要素を表示/非表示切り替え
+            const allImages = document.querySelectorAll('a-image');
+            const allUnderlines = document.querySelectorAll('[id^="underline"]');
+            
+            allImages.forEach(image => {
+                const isVisible = image.getAttribute('visible') !== false; // 明示的に設定されていない場合はtrueとする
+                image.setAttribute('visible', !isVisible);
+            });
+        
+            allUnderlines.forEach(underline => {
+                const isVisible = underline.getAttribute('visible') !== false;
+                underline.setAttribute('visible', !isVisible);
+            });
+        }
+
+
+
+        // 音声認識の設定
+        const recognizedTextElement = document.getElementById('recognizedText');
+        let recognition;
+        let isRecognizing = false;
+    
+        if ('webkitSpeechRecognition' in window) {
+            recognition = new webkitSpeechRecognition();
+            recognition.lang = 'ja-JP';
+            recognition.interimResults = false;
+            recognition.continuous = true;
+    
+            recognition.onresult = (event) => {
+                const transcript = event.results[0][0].transcript;
+                recognizedTextElement.setAttribute('value', transcript);
+                sendToGPT(transcript);  // GPTに送信
+            };
+    
+            recognition.onend = () => {
+                isRecognizing = false;
+                recognizedTextElement.setAttribute('value', "Recognition stopped");
+            };
+        } else {
+            recognizedTextElement.setAttribute('value', "Speech recognition not supported");
+        }
+    
+        function toggleRecognition() {
+            if (isRecognizing) {
+                recognition.stop();  // 音声認識を停止
+            } else {
+                recognizedTextElement.setAttribute('value', "Listening...");
+                recognition.start();  // 音声認識を開始
+                isRecognizing = true;
+            }
+        }
+        
+        // 音声認識結果をGPT-4へ送信し、その返答を表示
+        function sendToGPT(transcript) {
+            fetch('https://3.113.242.73:3002/gpt', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ prompt: transcript }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log("GPT Response:", data); // Log the full response data
+                if (data && data.response) {
+                    createTextImage(data.response);
+                } else {
+                    console.error('Invalid response from GPT API');
+                }
+            })
+            .catch(error => {
+                console.error('Error sending request to GPT:', error);
+            });
+        }
+
+        
+        
+
+    
+        let yOffset = 0;  // Y方向のオフセットを初期化
+        const maxLineLength = 45;  // 1行あたりの最大文字数
+    
+        function createTextImage(text) {
+            const recognizedTextContainer = document.getElementById('recognizedTextContainer');
+            
+            // テキストを指定の長さで分割
+            const textLines = text.match(new RegExp(`.{1,${maxLineLength}}`, 'g'));
+        
+            textLines.forEach(line => {
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                canvas.width = 4000; // 幅を固定
+                canvas.height = 150; // 高さを固定
+        
+                // テキストの描画
+                ctx.fillStyle = 'rgb(255, 255, 255)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = 'rgb(0, 0, 0)';
+                ctx.font = '60pt Arial';  // フォントサイズを一定に保つ
+                ctx.fillText(line, 20, 100);
+        
+                const base64Image = canvas.toDataURL('image/png');
+        
+                // a-image エンティティを作成
+                const imageEntity = document.createElement('a-image');
+                imageEntity.setAttribute('src', base64Image);
+                imageEntity.setAttribute('scale', '1.5 0.6 1');  // 各行のサイズを一定に設定
+                imageEntity.setAttribute('position', `0 ${yOffset} -3`);
+                recognizedTextContainer.appendChild(imageEntity);
+        
+                yOffset -= 0.6; // 次の行のために下げる
+            });
+        }
+
+    
+        // 音声認識ボタンのクリックイベント
+        document.querySelector('#speechButton').addEventListener('click', toggleRecognition);
+
+
+        // マルチバイト文字の処理関数
+        function aframeMutlByte() {
+            const text = mbTextElement.dataset.text;
+            const textArray = text.match(/.{1,10}/g);
+            let yOffset = 0;
+            textArray.forEach((line, index) => {
+                const textCnt = line.length;
+                const width = textCnt * 1.4;
+                const height = 1.6;
+                const yPosition = yOffset;
+                let cvs = document.createElement('canvas');
+                let ctx = cvs.getContext('2d');
+                cvs.width = width * 100;
+                cvs.height = height * 110;
+                ctx.fillStyle = "rgb(255, 255, 255)";
+                ctx.fillRect(0, 0, cvs.width, cvs.height);
+                ctx.fillStyle = "rgb(0, 0, 0)";
+                ctx.font = '100pt Arial';
+                ctx.fillText(line, 0, 125);
+                const base64 = cvs.toDataURL("image/png");
+                const imageElement = document.createElement('a-image');
+                imageElement.setAttribute('scale', `${(width) / 10} ${height / 9} 1`);
+                imageElement.setAttribute('src', base64);
+                imageElement.setAttribute('position', `0 ${yPosition} -5`);
+                mbTextElement.appendChild(imageElement);
+                
+                const underlineElement = document.createElement('a-entity');
+                underlineElement.setAttribute('geometry', 'primitive: plane; width: 0; height: 0.02');
+                underlineElement.setAttribute('material', 'color: red');
+                underlineElement.setAttribute('position', `-0.7 ${yPosition - 0.07} -4.98`);
+                underlineElement.setAttribute('id', `underline${index}`);
+                mbTextElement.appendChild(underlineElement);
+
+                yOffset -= 0.15;
+            });
+        }
+
+        // テキストファイルを読み込む関数
+        function loadTextFile(filename, bgm, effect) {
+            mbTextElement.innerHTML = '';
+            fetch(filename)
+                .then(response => response.text())
+                .then(data => {
+                    mbTextElement.dataset.text = data;
+                    aframeMutlByte();
+                    updateUnderline(bgm);
+                    effect.components.sound.playSound(); // Effect音再生
+                })
+                .catch(error => {
+                    console.error('Error loading text file:', error);
+                });
+        }
+
+        // 下線の進行処理
+        function updateUnderline(audio) {
+            const duration = audio.duration;
+            let currentTime = 0;
+            const interval = 100;
+            const textLines = mbTextElement.querySelectorAll('a-image').length;
+            const lineDuration = duration / textLines;
+            const intervalId = setInterval(() => {
+                currentTime = audio.currentTime;
+                const currentLine = Math.floor(currentTime / lineDuration);
+                const progress = (currentTime % lineDuration) / lineDuration * 1.4;
+                for (let i = 0; i <= currentLine; i++) {
+                    const underline = document.getElementById(`underline${i}`);
+                    if (underline) {
+                        if (i < currentLine) {
+                            underline.setAttribute('geometry', 'width', 1.4);
+                        } else {
+                            underline.setAttribute('geometry', 'width', progress);
+                            underline.setAttribute('position',`${progress / 2 - 0.7} ${parseFloat(underline.getAttribute('position').y)} -4.98`);
+
+                        }
+                    }
+                }
+                if (currentTime >= duration) {
+                    clearInterval(intervalId);
+                }
+            }, interval);
+        }
+
+         // すべての音声を停止する関数
+        function stopAllAudio() {
+            audioElements.forEach(audio => {
+                audio.pause();
+                audio.currentTime = 0; // 再生位置をリセット
+            });
+            effectElements.forEach(effect => {
+                effect.components.sound.stopSound();
+            });
+        }
+
+        // 初期ロード
+        window.onload = () => {
+            const {text, bgm, effect} = textFiles[0];
+            loadTextFile(text, bgm, effect);
+        };
+    </script>
+</body>
+</html>
