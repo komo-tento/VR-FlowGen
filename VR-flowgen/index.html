@@ -34,37 +34,26 @@
     
     <a-scene>
         <a-assets>
-            <img id="sky1" src="test-image/image.jpg">
-            <img id="sky2" src="test-image/image2.jpg">
-            <img id="sky3" src="test-image/image3.jpg">
-            <img id="sky4" src="test-image/image4.jpg">
-            <audio id="bgm1" src="sound/bgm1.mov"></audio>
-            <audio id="bgm2" src="sound/bgm2.mov"></audio>
-            <audio id="bgm3" src="sound/bgm3.mov"></audio>
-            <audio id="bgm4" src="sound/bgm4.mov"></audio>
-            <audio id="bgm5" src="sound/bgm5.mov"></audio>
-            <audio id="bgm6" src="sound/bgm6.mov"></audio>
-            <audio id="bgm7" src="sound/bgm7.mov"></audio>
-            <audio id="bgm8" src="sound/bgm8.mov"></audio>
-            <audio id="bgm9" src="sound/bgm9.mov"></audio>
-            <audio id="bgm10" src="sound/bgm10.mov"></audio>
-            <audio id="bgm11" src="sound/bgm11.mov"></audio>
-            <audio id="bgm12" src="sound/bgm12.mov"></audio>
-            <audio id="Effect1" src="Effect/Effect1.mov"></audio>
-            <audio id="Effect2" src="Effect/Effect2.mov"></audio>
-            <audio id="Effect3" src="Effect/Effect3.mov"></audio>
-            <audio id="Effect4" src="Effect/Effect4.mov"></audio>
+            <img id="sky1" src="test-image/kumonoito-test.jpg">
+            <img id="sky2" src="test-image/kumonoito-sky2.jpg">
+            <img id="sky3" src="test-image/kumonoito-sky3.jpg">
+            <img id="sky4" src="test-image/kumonoito-sky4.jpg">
+            <audio id="bgm1" src="sound/kumonoito1.mp3"></audio>
+            <audio id="bgm2" src="sound/kumonoito2.mp3"></audio>
+            <audio id="bgm3" src="sound/kumonoito3.mp3"></audio>
+            <audio id="bgm4" src="sound/kumonoito4.mp3"></audio>
+            <audio id="bgm5" src="sound/kumonoito5.mp3"></audio>
+            <audio id="bgm6" src="sound/kumonoito6.mp3"></audio>
+            <audio id="bgm7" src="sound/kumonoito7.mp3"></audio>
+            <audio id="bgm8" src="sound/kumonoito8.mp3"></audio>
+            <audio id="bgm9" src="sound/kumonoito9.mp3"></audio>
+            <audio id="bgm10" src="sound/kumonoito10.mp3"></audio>
+            <audio id="bgm11" src="sound/kumonoito11.mp3"></audio>
+            <audio id="bgm12" src="sound/kumonoito12.mp3"></audio>
         </a-assets>
 
         <a-sky id="sky" src="#sky1"></a-sky>
         <a-text id="text1" position="0.0 2.0 2.0" data-text=""></a-text>
-
-        <!-- Effect音を空間に配置 -->
-        <a-sound id="effectSound1" src="#Effect1" position="0 1.6 0" volume="1" loop="true"></a-sound>
-        <a-sound id="effectSound2" src="#Effect2" position="0 1.6 0" volume="1" loop="true"></a-sound>
-        <a-sound id="effectSound3" src="#Effect3" position="0 1.6 0" volume="1" loop="true"></a-sound>
-        <a-sound id="effectSound4" src="#Effect4" position="0 1.6 0" volume="1" loop="true"></a-sound>
-
 
         <!-- 音声認識結果表示 -->
         <a-text id="recognizedText" position="-3 0 -3" value="Speech will display here" color="white" width="4"></a-text>
@@ -93,33 +82,27 @@
             document.getElementById('bgm12'),
         ];
         
-        const effectElements = [
-            document.getElementById('effectSound1'),
-            document.getElementById('effectSound2'),
-            document.getElementById('effectSound3'),
-            document.getElementById('effectSound4')
-        ];
         
         const textFiles = [
-            {text: 'text/text-1.txt', bgm: audioElements[0], effect: effectElements[0]},
-            {text: 'text/text-2.txt', bgm: audioElements[1], effect: effectElements[1]},
-            {text: 'text/text-3.txt', bgm: audioElements[2], effect: effectElements[2]},
-            {text: 'text/text-4.txt', bgm: audioElements[3], effect: effectElements[3]},
-            {text: 'text/text-5.txt', bgm: audioElements[4], effect: effectElements[0]},
-            {text: 'text/text-6.txt', bgm: audioElements[5], effect: effectElements[1]},
-            {text: 'text/text-7.txt', bgm: audioElements[6], effect: effectElements[2]},
-            {text: 'text/text-8.txt', bgm: audioElements[7], effect: effectElements[3]},
-            {text: 'text/text-9.txt', bgm: audioElements[8], effect: effectElements[0]},
-            {text: 'text/text-10.txt', bgm: audioElements[9], effect: effectElements[1]},
-            {text: 'text/text-11.txt', bgm: audioElements[10], effect: effectElements[2]},
-            {text: 'text/text-12.txt', bgm: audioElements[11], effect: effectElements[3]}
+            {text: 'text/kumonoito-1.txt', bgm: audioElements[0],
+            {text: 'text/kumonoito-2.txt', bgm: audioElements[1]},
+            {text: 'text/kumonoito-3.txt', bgm: audioElements[2]},
+            {text: 'text/kumonoito-4.txt', bgm: audioElements[3]},
+            {text: 'text/kumonoito-5.txt', bgm: audioElements[4]},
+            {text: 'text/kumonoito-6.txt', bgm: audioElements[5]},
+            {text: 'text/kumonoito-7.txt', bgm: audioElements[6]},
+            {text: 'text/kumonoito-8.txt', bgm: audioElements[7]},
+            {text: 'text/kumonoito-9.txt', bgm: audioElements[8]},
+            {text: 'text/kumonoito-10.txt', bgm: audioElements[9]},
+            {text: 'text/kumonoito-11.txt', bgm: audioElements[10]},
+            {text: 'text/kumonoito-12.txt', bgm: audioElements[11]}
         ];
 
         // ボタンのイベントリスナー設定
         document.getElementById('nextButton').addEventListener('click', () => {
             if (currentText < textFiles.length) {
                 stopAllAudio();
-                const {text, bgm, effect} = textFiles[currentText];
+                const {text, bgm} = textFiles[currentText];
                 const sky = document.getElementById("sky");
         
                 // currentText の値に応じて画像を変更
@@ -131,7 +114,7 @@
                     sky.setAttribute("src", "#sky4"); // sky4 を設定
                 } 
         
-                loadTextFile(text, bgm, effect);
+                loadTextFile(text, bgm);
                 bgm.play();
                 currentText++;
             }
@@ -299,7 +282,7 @@
         }
 
         // テキストファイルを読み込む関数
-        function loadTextFile(filename, bgm, effect) {
+        function loadTextFile(filename, bgm) {
             mbTextElement.innerHTML = '';
             fetch(filename)
                 .then(response => response.text())
@@ -307,7 +290,6 @@
                     mbTextElement.dataset.text = data;
                     aframeMutlByte();
                     updateUnderline(bgm);
-                    effect.components.sound.playSound(); // Effect音再生
                 })
                 .catch(error => {
                     console.error('Error loading text file:', error);
@@ -349,15 +331,12 @@
                 audio.pause();
                 audio.currentTime = 0; // 再生位置をリセット
             });
-            effectElements.forEach(effect => {
-                effect.components.sound.stopSound();
-            });
         }
 
         // 初期ロード
         window.onload = () => {
-            const {text, bgm, effect} = textFiles[0];
-            loadTextFile(text, bgm, effect);
+            const {text, bgm} = textFiles[0];
+            loadTextFile(text, bgm);
         };
     </script>
 </body>
